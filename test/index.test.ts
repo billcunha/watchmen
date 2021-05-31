@@ -2,13 +2,13 @@ import { Server } from "@hapi/hapi";
 import { describe, it, beforeEach, afterEach } from "mocha";
 import chai, { expect } from "chai";
 
-import { init } from "../src/server";
+import { start } from "../src/server";
 
 describe("smoke test", async () => {
   let server: Server;
 
   beforeEach((done) => {
-    init().then(s => { server = s; done(); });
+    start().then(s => { server = s; done(); });
   })
   afterEach((done) => {
     server.stop().then(() => done());
@@ -17,9 +17,9 @@ describe("smoke test", async () => {
   it("index responds", async () => {
     const res = await server.inject({
       method: "get",
-      url: "/"
+      url: "/healthz"
     });
     expect(res.statusCode).to.equal(200);
-    expect(res.result).to.equal("Hello! Nice to have met you.");
+    expect(res.result).to.equal("Hello!");
   });
 })
