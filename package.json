@@ -7,6 +7,7 @@
     "@hapi/hapi": "^20.1.3",
     "@prisma/client": "2.23.0",
     "@types/node": "^15.6.1",
+    "hapi-cron": "^1.1.0",
     "typescript": "^4.3.2"
   },
   "devDependencies": {
