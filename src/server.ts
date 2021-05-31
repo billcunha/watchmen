@@ -1,36 +1,21 @@
-'use strict';
-
 import Hapi from "@hapi/hapi";
 import { Request, Server } from "@hapi/hapi";
+import prisma from "./plugins/prisma";
+import posts from "./plugins/posts";
 
-export let server: Server;
+const server: Hapi.Server = Hapi.server({
+  port: process.env.PORT || 3000,
+  host: process.env.HOST || 'localhost',
+});
 
-export const init = async function(): Promise<Server> {
-  server = Hapi.server({
-    port: process.env.PORT || 4000,
-    host: '0.0.0.0'
-  });
-
-  server.route({
-    method: "GET",
-    path: "/",
-    handler: index
-  });
-
-  return server;
-};
-
-function index(request: Request): string {
-  console.log("Processing request", request.info.id);
-  return "Hello! Nice to have met you.";
+export async function start(): Promise<Hapi.Server> {
+  await server.register([prisma, posts])
+  await server.start()
+  return server
 }
 
-export const start = async function (): Promise<void> {
-  console.log(`Listening on ${server.settings.host}:${server.settings.port}`);
-  return server.start();
-};
-
-process.on('unhandledRejection', (err) => {
+process.on('unhandledRejection', async (err) => {
+  await server.app.prisma.$disconnect()
   console.error("unhandledRejection");
   console.error(err);
   process.exit(1);

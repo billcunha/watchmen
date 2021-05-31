@@ -1,3 +1,8 @@
-import { init, start } from "./server";
+import { start } from "./server";
 
-init().then(() => start());
+start().then((server) => {
+    console.log(`Server ready at: ${server.info.uri}`)
+  })
+  .catch((err) => {
+    console.log(err)
+})
