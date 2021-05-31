@@ -12,6 +12,7 @@ generator client {
 
 model Post {
   id        Int      @id @default(autoincrement())
+  redditId  String   @unique
   title     String
   author    String
   upVotes   Int      @default(0)
