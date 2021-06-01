@@ -10,7 +10,7 @@ const server: Hapi.Server = Hapi.server({
   host: process.env.HOST || "localhost",
 });
 
-export async function start(): Promise<Hapi.Server> {
+export async function createServer(): Promise<Hapi.Server> {
   await server.register([healthz, prisma, posts]);
   await server.register({
     plugin: HapiCron,
@@ -30,7 +30,12 @@ export async function start(): Promise<Hapi.Server> {
       }]
     }
   });
+  return server;
+}
+
+export async function startServer(server: Hapi.Server): Promise<Hapi.Server> {
   await server.start();
+  console.log(`Server running on ${server.info.uri}`);
   return server;
 }
 

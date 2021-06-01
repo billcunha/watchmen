@@ -43,7 +43,15 @@ async function getPosts(request: Hapi.Request, h: Hapi.ResponseToolkit) {
 async function cronPosts(request: Hapi.Request, h: Hapi.ResponseToolkit){
   const { prisma } = request.server.app;
 
-  const response = await redditApi.get("/r/artificial/hot");
+  let response;
+
+  try {
+    response = await redditApi.get("/r/artificial/hot");
+  } catch (err) {
+    console.log(err);
+    h.response("Fail to get reddit api").code(503);
+    return;
+  }
 
   // check if the return is correct
   if(!response || !response.data || !response.data.data || !response.data.data || !response.data.data.children) {
@@ -71,6 +79,8 @@ async function cronPosts(request: Hapi.Request, h: Hapi.ResponseToolkit){
       }});
     } catch (err) {
       console.log(err);
+      h.response("Fail to save data on db").code(500);
+      return;
     }
   });
 

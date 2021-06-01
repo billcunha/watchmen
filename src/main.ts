@@ -1,8 +1,5 @@
-import { start } from "./server";
+import { createServer, startServer } from "./server";
 
-start().then((server) => {
-    console.log(`Server ready at: ${server.info.uri}`)
-  })
-  .catch((err) => {
+createServer().then(startServer).catch((err) => {
     console.log(err)
 })
