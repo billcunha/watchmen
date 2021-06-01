@@ -1,14 +1,14 @@
 import { Server } from "@hapi/hapi";
 import { describe, it, beforeEach, afterEach } from "mocha";
-import chai, { expect } from "chai";
+import { expect } from "chai";
 
-import { start } from "../src/server";
+import { createServer } from "../src/server";
 
 describe("smoke test", async () => {
   let server: Server;
 
   beforeEach((done) => {
-    start().then(s => { server = s; done(); });
+    createServer().then(s => { server = s; done(); });
   })
   afterEach((done) => {
     server.stop().then(() => done());
