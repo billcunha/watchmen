@@ -1,6 +1,7 @@
 import Hapi from "@hapi/hapi";
 import redditApi from "../redditApi";
 import Joi from "joi";
+import { Prisma } from "@prisma/client";
 
 const postsPlugin = {
   name: "app/posts",
@@ -14,9 +15,9 @@ const postsPlugin = {
         options: {
           validate: {
             query: Joi.object({
-              start: Joi.date().less('now').required(),
-              end: Joi.date().required(),
-              sort: Joi.any().valid("upVotes", "numComments").required(),
+              start: Joi.date().less("now").required(),
+              end: Joi.date().greater(Joi.ref("start")).required(),
+              orderBy: Joi.any().valid("upVotes", "numComments").required(),
             })
           }
         }
@@ -43,11 +44,31 @@ async function getPosts(request: Hapi.Request, h: Hapi.ResponseToolkit) {
   const { prisma } = request.server.app;
 
   try {
-    const post = await prisma.post.findMany();
+    const post = await prisma.post.findMany({
+      where: {
+        postedAt: {
+          gte: new Date(request.query.start),
+          lte: new Date(request.query.end),
+        }
+      },
+      orderBy: getOrder(request.query.orderBy)
+    });
     return h.response(post || undefined).code(200);
   } catch (err) {
     console.log(err);
   }
+}
+
+function getOrder(orderBy: string) : Prisma.Enumerable<Prisma.PostOrderByInput> {
+  if (orderBy == "upVotes") {
+    return {
+      upVotes: "desc"
+    };
+  }
+
+  return {
+    numComments: "desc"
+  };
 }
 
 async function cronPosts(request: Hapi.Request, h: Hapi.ResponseToolkit){
@@ -56,10 +77,11 @@ async function cronPosts(request: Hapi.Request, h: Hapi.ResponseToolkit){
   let response;
 
   try {
-    response = await redditApi.get("/r/artificial/hot");
+    // limit 50 to increase the ammount of posts
+    response = await redditApi.get("/r/artificial/hot?limit=50");
   } catch (err) {
     console.log(err);
-    h.response("Fail to get reddit api").code(503);
+    h.response("Fail on get reddit api").code(503);
     return;
   }
 
@@ -71,6 +93,7 @@ async function cronPosts(request: Hapi.Request, h: Hapi.ResponseToolkit){
 
   response.data.data.children.forEach(async function (item: any) {
     try {
+      // perform a upsert: insert if does not exist, update if exists
       await prisma.post.upsert({
       create: {
         redditId: item.data.id,
@@ -78,7 +101,8 @@ async function cronPosts(request: Hapi.Request, h: Hapi.ResponseToolkit){
         upVotes: item.data.ups,
         numComments: item.data.num_comments,
         author: item.data.author,
-        postedAt: new Date(item.data.created).toISOString()
+        // 1000 to convert unix timestamp to Date
+        postedAt: new Date(item.data.created * 1000).toISOString()
       },
       update: {
         title: item.data.title,
@@ -91,7 +115,7 @@ async function cronPosts(request: Hapi.Request, h: Hapi.ResponseToolkit){
       }});
     } catch (err) {
       console.log(err);
-      h.response("Fail to save data on db").code(500);
+      h.response("Fail on save data on db").code(500);
       return;
     }
   });

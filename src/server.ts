@@ -1,5 +1,6 @@
 import Hapi from "@hapi/hapi";
 
+import authors from "./plugins/authors";
 import prisma from "./plugins/prisma";
 import posts from "./plugins/posts";
 import healthz from "./plugins/healthz";
@@ -12,7 +13,7 @@ const server: Hapi.Server = Hapi.server({
 });
 
 export async function createServer(): Promise<Hapi.Server> {
-  await server.register([healthz, prisma, posts]);
+  await server.register([authors, healthz, prisma, posts]);
   await server.register({
     plugin: HapiCron,
     options: {
