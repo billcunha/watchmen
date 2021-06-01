@@ -1,5 +1,6 @@
 import Hapi from "@hapi/hapi";
 import redditApi from "../redditApi";
+import Joi from "joi";
 
 const postsPlugin = {
   name: "app/posts",
@@ -10,6 +11,15 @@ const postsPlugin = {
         method: "GET",
         path: "/posts",
         handler: getPosts,
+        options: {
+          validate: {
+            query: Joi.object({
+              start: Joi.date().less('now').required(),
+              end: Joi.date().required(),
+              sort: Joi.any().valid("upVotes", "numComments").required(),
+            })
+          }
+        }
       },
     ])
 

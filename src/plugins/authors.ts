@@ -1,4 +1,5 @@
 import Hapi from "@hapi/hapi";
+import Joi from "joi";
 
 const postsPlugin = {
   name: "app/authors",
@@ -9,6 +10,13 @@ const postsPlugin = {
         method: "GET",
         path: "/authors",
         handler: getAuthors,
+        options: {
+          validate: {
+            query: Joi.object({
+              sort: Joi.any().valid("upVotes", "numComments").required(),
+            })
+          }
+        }
       },
     ])
   },

@@ -1,4 +1,5 @@
 import Hapi from "@hapi/hapi";
+
 import prisma from "./plugins/prisma";
 import posts from "./plugins/posts";
 import healthz from "./plugins/healthz";
@@ -16,17 +17,17 @@ export async function createServer(): Promise<Hapi.Server> {
     plugin: HapiCron,
     options: {
       jobs: [{
-          name: "updatePosts",
-          time: "0 8 * * *",
-          timezone: "America/Sao_Paulo",
-          request: {
-              method: "PUT",
-              url: "/posts",
-              allowInternals: true
-          },
-          onComplete: (res: any) => {
-              console.log("Cronjob finished: " + res);
-          }
+        name: "updatePosts",
+        time: "0 8 * * *",
+        timezone: "America/Sao_Paulo",
+        request: {
+          method: "PUT",
+          url: "/posts",
+          allowInternals: true
+        },
+        onComplete: (res: any) => {
+          console.log("Cronjob finished: " + res);
+        }
       }]
     }
   });
