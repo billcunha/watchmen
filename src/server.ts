@@ -3,11 +3,11 @@ import prisma from "./plugins/prisma";
 import posts from "./plugins/posts";
 import healthz from "./plugins/healthz";
 
-const HapiCron = require('hapi-cron');
+const HapiCron = require("hapi-cron");
 
 const server: Hapi.Server = Hapi.server({
   port: process.env.PORT || 3000,
-  host: process.env.HOST || 'localhost',
+  host: process.env.HOST || "localhost",
 });
 
 export async function start(): Promise<Hapi.Server> {
@@ -16,24 +16,25 @@ export async function start(): Promise<Hapi.Server> {
     plugin: HapiCron,
     options: {
       jobs: [{
-          name: 'testcron',
-          time: '0 8 * * *',
-          timezone: 'Europe/London',
+          name: "updatePosts",
+          time: "0 8 * * *",
+          timezone: "America/Sao_Paulo",
           request: {
-              method: 'GET',
-              url: '/test-url'
+              method: "PUT",
+              url: "/posts",
+              allowInternals: true
           },
           onComplete: (res: any) => {
-              console.log(res); // 'hello world'
+              console.log("Cronjob finished: " + res);
           }
       }]
-  }
+    }
   });
   await server.start();
   return server;
 }
 
-process.on('unhandledRejection', async (err) => {
+process.on("unhandledRejection", async (err) => {
   await server.app.prisma.$disconnect();
   console.error("unhandledRejection");
   console.error(err);

@@ -1,24 +1,27 @@
-import { prisma } from '.prisma/client';
-import Hapi from '@hapi/hapi';
-import redditApi from '../redditApi';
+import Hapi from "@hapi/hapi";
+import redditApi from "../redditApi";
 
 const postsPlugin = {
-  name: 'app/posts',
-  dependencies: ['prisma'],
+  name: "app/posts",
+  dependencies: ["prisma"],
   register: async function (server: Hapi.Server) {
     server.route([
       {
-        method: 'GET',
-        path: '/posts',
+        method: "GET",
+        path: "/posts",
         handler: getPosts,
       },
     ])
 
+    // Internal route used for cronjob
     server.route([
       {
-        method: 'PUT',
-        path: '/posts',
+        method: "PUT",
+        path: "/posts",
         handler: cronPosts,
+        options: {
+          isInternal: true,
+        }
       },
     ])
   },
@@ -39,12 +42,6 @@ async function getPosts(request: Hapi.Request, h: Hapi.ResponseToolkit) {
 
 async function cronPosts(request: Hapi.Request, h: Hapi.ResponseToolkit){
   const { prisma } = request.server.app;
-
-  // Block requests from outside of server
-  console.log(request.info.remoteAddress)
-  // if (request.info.remoteAddress != "localhost") {
-  //   return h.response().code(401);
-  // }
 
   const response = await redditApi.get("/r/artificial/hot");
 
