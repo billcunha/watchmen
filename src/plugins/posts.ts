@@ -61,19 +61,20 @@ async function cronPosts(request: Hapi.Request, h: Hapi.ResponseToolkit){
 
   response.data.data.children.forEach(async function (item: any) {
     try {
+      console.log('com' + item.data.num_comments);
       await prisma.post.upsert({
       create: {
         redditId: item.data.id,
         title: item.data.title,
         upVotes: item.data.ups,
-        numComments: item.data.numComments,
+        numComments: item.data.num_comments,
         author: item.data.author,
         postedAt: new Date(item.data.created).toISOString()
       },
       update: {
         title: item.data.title,
         upVotes: item.data.ups,
-        numComments: item.data.numComments,
+        numComments: item.data.num_comments,
         updatedAt: new Date().toISOString()
       },
       where: {
