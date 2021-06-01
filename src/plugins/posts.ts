@@ -66,12 +66,14 @@ async function cronPosts(request: Hapi.Request, h: Hapi.ResponseToolkit){
         redditId: item.data.id,
         title: item.data.title,
         upVotes: item.data.ups,
+        numComments: item.data.numComments,
         author: item.data.author,
         postedAt: new Date(item.data.created).toISOString()
       },
       update: {
         title: item.data.title,
         upVotes: item.data.ups,
+        numComments: item.data.numComments,
         updatedAt: new Date().toISOString()
       },
       where: {

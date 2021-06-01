@@ -17,7 +17,8 @@ export async function createServer(): Promise<Hapi.Server> {
     options: {
       jobs: [{
           name: "updatePosts",
-          time: "0 8 * * *",
+          // time: "0 8 * * *",
+          time: "* * * * *",
           timezone: "America/Sao_Paulo",
           request: {
               method: "PUT",
